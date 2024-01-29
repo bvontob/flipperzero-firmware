@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi_hal_gpio.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,12 @@ void gpio_items_set_pin(GPIOItems* items, uint8_t index, bool level);
 void gpio_items_set_all_pins(GPIOItems* items, bool level);
 
 const char* gpio_items_get_pin_name(GPIOItems* items, uint8_t index);
+
+const char* gpio_items_get_pin_short_name(GPIOItems* items, uint8_t index);
+
+bool gpio_items_pin_is_high(GPIOItems* items, uint8_t index);
+
+bool gpio_items_pin_is_output(GPIOItems* items, uint8_t index);
 
 #ifdef __cplusplus
 }

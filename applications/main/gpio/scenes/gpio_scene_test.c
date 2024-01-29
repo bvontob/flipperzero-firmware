@@ -14,7 +14,7 @@ void gpio_scene_test_ok_callback(InputType type, void* context) {
 void gpio_scene_test_on_enter(void* context) {
     furi_assert(context);
     GpioApp* app = context;
-    gpio_items_configure_all_pins(app->gpio_items, GpioModeOutputPushPull);
+    gpio_items_configure_all_pins(app->gpio_items, GpioModeInput);
     gpio_test_set_ok_callback(app->gpio_test, gpio_scene_test_ok_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewGpioTest);
 }
