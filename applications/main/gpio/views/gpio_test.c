@@ -62,12 +62,10 @@ static void gpio_test_draw_callback(Canvas* canvas, void* _model) {
         elements_button_right(
             canvas, model->pin_idx < gpio_items_get_count(model->gpio_items) - 1 ? "" : "All");
 
-    bool o = true;
     int x = 4;
     const int y = 28;
 
     for(int p = 0; p < gpio_items_get_count(model->gpio_items); p++) {
-        o = !o;
         if(p == 6) x += 9;
         gpio_test_draw_pin(
             canvas,
