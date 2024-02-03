@@ -81,10 +81,10 @@ static void gpio_test_draw_callback(Canvas* canvas, void* _model) {
         if(p == model->pin_idx && gpio_items_pin_is_high(model->gpio_items, p)) {
             notification_message(model->notifications, &sequence_set_blue_255);
             model->led_needs_reset = true;
-        } else if(model->led_needs_reset
-                  && (model->pin_idx == gpio_items_get_count(model->gpio_items)
-                      || (p == model->pin_idx
-                          && !gpio_items_pin_is_high(model->gpio_items, p)))) {
+        } else if(
+            model->led_needs_reset &&
+            (model->pin_idx == gpio_items_get_count(model->gpio_items) ||
+             (p == model->pin_idx && !gpio_items_pin_is_high(model->gpio_items, p)))) {
             notification_message(model->notifications, &sequence_reset_blue);
             model->led_needs_reset = false;
         }
