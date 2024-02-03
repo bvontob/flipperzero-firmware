@@ -1,17 +1,19 @@
 #include "gpio_test.h"
 #include "../gpio_items.h"
+#include "../gpio_app_i.h"
 
 #include <gui/elements.h>
 
 struct GpioTest {
     View* view;
-    GpioTestOkCallback callback;
     void* context;
 };
 
 typedef struct {
     uint8_t pin_idx;
     GPIOItems* gpio_items;
+    NotificationApp* notifications;
+    bool led_needs_reset;
 } GpioTestModel;
 
 static bool gpio_test_process_left(GpioTest* gpio_test);
@@ -76,6 +78,16 @@ static void gpio_test_draw_callback(Canvas* canvas, void* _model) {
             gpio_items_pin_is_output(model->gpio_items, p),
             p == model->pin_idx || model->pin_idx == gpio_items_get_count(model->gpio_items));
         x += 15;
+        if(p == model->pin_idx && gpio_items_pin_is_high(model->gpio_items, p)) {
+            notification_message(model->notifications, &sequence_set_blue_255);
+            model->led_needs_reset = true;
+        } else if(model->led_needs_reset
+                  && (model->pin_idx == gpio_items_get_count(model->gpio_items)
+                      || (p == model->pin_idx
+                          && !gpio_items_pin_is_high(model->gpio_items, p)))) {
+            notification_message(model->notifications, &sequence_reset_blue);
+            model->led_needs_reset = false;
+        }
     }
 }
 
@@ -200,21 +212,26 @@ static bool gpio_test_process_ok(GpioTest* gpio_test, InputEvent* event) {
                 }
                 consumed = true;
             }
-            gpio_test->callback(event->type, gpio_test->context);
         },
         true);
 
     return consumed;
 }
 
-GpioTest* gpio_test_alloc(GPIOItems* gpio_items) {
+GpioTest* gpio_test_alloc(GPIOItems* gpio_items, NotificationApp* notifications) {
     GpioTest* gpio_test = malloc(sizeof(GpioTest));
 
     gpio_test->view = view_alloc();
     view_allocate_model(gpio_test->view, ViewModelTypeLocking, sizeof(GpioTestModel));
 
     with_view_model(
-        gpio_test->view, GpioTestModel * model, { model->gpio_items = gpio_items; }, false);
+        gpio_test->view,
+        GpioTestModel * model,
+        {
+            model->gpio_items = gpio_items;
+            model->notifications = notifications;
+        },
+        false);
 
     view_set_context(gpio_test->view, gpio_test);
     view_set_draw_callback(gpio_test->view, gpio_test_draw_callback);
@@ -232,18 +249,4 @@ void gpio_test_free(GpioTest* gpio_test) {
 View* gpio_test_get_view(GpioTest* gpio_test) {
     furi_assert(gpio_test);
     return gpio_test->view;
-}
-
-void gpio_test_set_ok_callback(GpioTest* gpio_test, GpioTestOkCallback callback, void* context) {
-    furi_assert(gpio_test);
-    furi_assert(callback);
-    with_view_model(
-        gpio_test->view,
-        GpioTestModel * model,
-        {
-            UNUSED(model);
-            gpio_test->callback = callback;
-            gpio_test->context = context;
-        },
-        false);
 }

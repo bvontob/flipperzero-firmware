@@ -53,7 +53,7 @@ GpioApp* gpio_app_alloc() {
         app->view_dispatcher,
         GpioAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
-    app->gpio_test = gpio_test_alloc(app->gpio_items);
+    app->gpio_test = gpio_test_alloc(app->gpio_items, app->notifications);
     view_dispatcher_add_view(
         app->view_dispatcher, GpioAppViewGpioTest, gpio_test_get_view(app->gpio_test));
 

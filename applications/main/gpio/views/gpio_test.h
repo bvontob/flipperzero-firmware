@@ -3,11 +3,12 @@
 #include "../gpio_items.h"
 
 #include <gui/view.h>
+#include <notification/notification_messages.h>
 
 typedef struct GpioTest GpioTest;
 typedef void (*GpioTestOkCallback)(InputType type, void* context);
 
-GpioTest* gpio_test_alloc(GPIOItems* gpio_items);
+GpioTest* gpio_test_alloc(GPIOItems* gpio_items, NotificationApp* notifications);
 
 void gpio_test_free(GpioTest* gpio_test);
 
