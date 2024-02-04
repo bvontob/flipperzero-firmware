@@ -54,37 +54,44 @@ static void gpio_test_draw_pin(
 
 static void gpio_test_draw_callback(Canvas* canvas, void* _model) {
     GpioTestModel* model = _model;
+    int x = 4;
+    const int y = 28;
+    const int all_pins = gpio_items_get_count(model->gpio_items);
+    const int last_pin = all_pins - 1;
+
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 64, 2, AlignCenter, AlignTop, "GPIO Manual Control");
     canvas_set_font(canvas, FontSecondary);
-    if(model->pin_idx) elements_button_left(canvas, model->pin_idx ? "" : "Config");
-    if(gpio_items_pin_is_output(model->gpio_items, model->pin_idx))
+    if(model->pin_idx) {
+        elements_button_left(canvas, "");
+    }
+    if(gpio_items_pin_is_output(model->gpio_items, model->pin_idx)) {
         elements_button_center(canvas, "High");
-    if(model->pin_idx < gpio_items_get_count(model->gpio_items))
-        elements_button_right(
-            canvas, model->pin_idx < gpio_items_get_count(model->gpio_items) - 1 ? "" : "All");
+    }
+    if(model->pin_idx <= last_pin) {
+        elements_button_right(canvas, model->pin_idx < last_pin ? "" : "All");
+    }
 
-    int x = 4;
-    const int y = 28;
-
-    for(int p = 0; p < gpio_items_get_count(model->gpio_items); p++) {
-        if(p == 6) x += 9;
+    for(int pin = 0; pin <= last_pin; pin++, x += 15) {
+        if(pin == 6) {
+            x += 9;
+        }
         gpio_test_draw_pin(
             canvas,
             x,
             y,
-            gpio_items_get_pin_short_name(model->gpio_items, p),
-            gpio_items_pin_is_high(model->gpio_items, p),
-            gpio_items_pin_is_output(model->gpio_items, p),
-            p == model->pin_idx || model->pin_idx == gpio_items_get_count(model->gpio_items));
-        x += 15;
-        if(p == model->pin_idx && gpio_items_pin_is_high(model->gpio_items, p)) {
+            gpio_items_get_pin_short_name(model->gpio_items, pin),
+            gpio_items_pin_is_high(model->gpio_items, pin),
+            gpio_items_pin_is_output(model->gpio_items, pin),
+            pin == model->pin_idx || model->pin_idx == all_pins);
+
+        if(pin == model->pin_idx && gpio_items_pin_is_high(model->gpio_items, pin)) {
             notification_message(model->notifications, &sequence_set_blue_255);
             model->led_needs_reset = true;
         } else if(
             model->led_needs_reset &&
-            (model->pin_idx == gpio_items_get_count(model->gpio_items) ||
-             (p == model->pin_idx && !gpio_items_pin_is_high(model->gpio_items, p)))) {
+            (model->pin_idx == all_pins ||
+             (pin == model->pin_idx && !gpio_items_pin_is_high(model->gpio_items, pin)))) {
             notification_message(model->notifications, &sequence_reset_blue);
             model->led_needs_reset = false;
         }
@@ -153,7 +160,6 @@ static bool gpio_test_process_updown(GpioTest* gpio_test, InputEvent* event) {
                 } else {
                     if(gpio_items_pin_is_output(model->gpio_items, model->pin_idx) &&
                        gpio_items_pin_is_high(model->gpio_items, model->pin_idx)) {
-                        gpio_items_set_pin(model->gpio_items, model->pin_idx, true);
                         gpio_items_set_pin(model->gpio_items, model->pin_idx, false);
                     } else {
                         gpio_items_configure_pin(model->gpio_items, model->pin_idx, GpioModeInput);
