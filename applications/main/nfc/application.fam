@@ -120,6 +120,15 @@ App(
 )
 
 App(
+    appid="st25dv02k_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="st25dv02k_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/st25dv02k.c"],
+)
+
+App(
     appid="nfc_start",
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
